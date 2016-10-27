@@ -4,8 +4,10 @@ block content
   div#image-list
     each image in images
       div.image
-        img(src=image).img-rounded
+        img(src=image.url).img-rounded
         h4 Scary
+        if is_admin
+          a(href="/delete/" + image.id).btn.btn-primary Delete
   unless start == 0
     div
       a(href="/browse") More

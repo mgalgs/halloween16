@@ -56,6 +56,13 @@ function imageURL(image_id) {
     return imageFromBase(image_id);
 }
 
+function imageInfo(image_id) {
+    return {
+        url: imageURL(image_id),
+        id: image_id
+    }
+}
+
 function imageView(req, res, start) {
     redisClient.lrange('ween16:image_list', start, -1, function(err, items) {
         var images;
@@ -64,13 +71,22 @@ function imageView(req, res, start) {
             res.status(500).send(err);
             return;
         }
-        images = items.reverse().map(imageURL);
+        images = items.reverse().map(imageInfo);
         res.render('index', {
             images: images,
-            start: start
+            start: start,
+            is_admin: is_admin
         });
     });
 }
+
+var is_admin = false;
+
+app.use(function(req, res, next) {
+    if (req.query.token == process.env.API_KEY)
+        is_admin = true;
+    next();
+});
 
 app.get('/', function(req, res) {
     console.log('Get of /');

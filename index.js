@@ -1,6 +1,8 @@
 require("console-stamp")(console);
 const util = require('util');
 var mkdirp = require('mkdirp');
+var mmmagic = require('mmmagic');
+var magic = new mmmagic.Magic(mmmagic.MAGIC_MIME_TYPE);
 var redis = require("redis"),
     redisClient = redis.createClient();
 var express = require('express');
@@ -43,9 +45,8 @@ function imageURL(image_id) {
     return imageFromBase(image_id);
 }
 
-app.get('/', function (req, res) {
-    console.log('Get of /')
-    redisClient.lrange('ween16:image_list', 0, -1, function(err, items) {
+function imageView(req, res, limit) {
+    redisClient.lrange('ween16:image_list', 0, limit, function(err, items) {
         var images;
 
         if (err) {
@@ -54,9 +55,15 @@ app.get('/', function (req, res) {
         }
         images = items.reverse().map(imageURL);
         res.render('index', {
-            images: images
+            images: images,
+            limit: limit
         });
     });
+}
+
+app.get('/', function (req, res) {
+    console.log('Get of /')
+    imageView(req, res, 10);
 });
 
 app.post('/upload', function(req, res) {
@@ -81,9 +88,19 @@ app.post('/upload', function(req, res) {
                 res.status(500).send(err);
                 return;
             }
-            redisClient.rpush('ween16:image_list', image_id);
-            io.emit('new image', imageURL(image_id));
-            res.send('File uploaded!');
+            magic.detectFile(filename, function(err, result) {
+                if (err) {
+                    res.status(500).send(err);
+                    return;
+                }
+                if (result !== 'image/jpeg') {
+                    res.status(500).send('Invalid image format: ' + result);
+                    return;
+                }
+                redisClient.rpush('ween16:image_list', image_id);
+                io.emit('new image', imageURL(image_id));
+                res.send('File uploaded!');
+            });
         });
     });
 });

@@ -18,4 +18,6 @@ html
       div#image-list
         each image in images
           div.image
-            img(src=image)
+            img(src=image).img-rounded
+      unless limit == -1
+        a(href="/browse") More

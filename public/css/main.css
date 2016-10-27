@@ -5,3 +5,7 @@ body {
 .image img {
     width: 500px;
 }
+
+.image {
+    padding: 10px;
+}

@@ -28,6 +28,11 @@ h4 {
     font-size: 2em;
 }
 
+h1 a, h1 a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
 .image, .big-image {
     color: #000;
     padding: 10px;

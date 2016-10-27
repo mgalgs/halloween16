@@ -4,8 +4,9 @@ block content
   div#image-list
     each image in images
       div.image
-        img(src=image.url).img-rounded
-        h4 Scary thing ##{image.id}
+        a(href="/thing/" + image.id)
+          img(src=image.url).img-rounded
+        h4 Scary thing #[a(class="text-red" href="/thing/" + image.id) ##{image.id}]
         if is_admin
           form(action="/delete" method="POST")
             input(type="hidden" name="id" value=image.id)

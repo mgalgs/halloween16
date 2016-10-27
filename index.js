@@ -94,6 +94,12 @@ app.get('/browse', function(req, res) {
     imageView(req, res, 0);
 });
 
+app.get('/thing/:imageId', function(req, res) {
+    res.render('image_detail', {
+        image: imageInfo(req.params.imageId)
+    })
+});
+
 app.post('/delete', function(req, res) {
     console.log('Deleting %d', req.body.id)
     redisClient.lrem('ween16:image_list', 1, req.body.id, function(err, nremoved) {

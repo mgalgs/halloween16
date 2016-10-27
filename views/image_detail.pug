@@ -1,0 +1,6 @@
+extends layout.pug
+
+block content
+  div.big-image
+    img(src=image.url).img-rounded
+    h2 Scary thing #[a(href="/thing/" + image.id) ##{image.id}]

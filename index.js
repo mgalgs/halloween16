@@ -84,6 +84,11 @@ function is_admin(req) {
     return req.query.token == process.env.API_KEY;
 }
 
+app.use(function(req, res, next) {
+    res.locals.path = req.path;
+    next();
+});
+
 app.get('/', function(req, res) {
     console.log('Get of /');
     imageView(req, res, -10);

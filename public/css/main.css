@@ -31,7 +31,6 @@ h4 {
 .image, .big-image {
     color: #000;
     padding: 10px;
-    margin: 80px auto;
     background-color: #ddd;
     border-radius: 2px;
     box-shadow: #996 0 0 60px;
@@ -39,10 +38,12 @@ h4 {
 
 .image {
     width: 600px;
+    margin: 80px auto;
 }
 
 .big-image {
     width: 90%;
+    margin: 10px auto;
 }
 
 .image img, .big-image img {

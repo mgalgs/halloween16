@@ -1,6 +1,16 @@
 extends layout.pug
 
+block moremeta
+  meta(property="og:url" content=path)
+  meta(property="og:title" content="Scary thing #" + image.id)
+  meta(property="og:description" content="Just a scary picture from the Scary Photobooth")
+  meta(property="og:image" content=image.url)
+
 block content
   div.big-image
     img(src=image.url).img-rounded
-    h2 Scary thing #[a(href="/thing/" + image.id) ##{image.id}]
+    h2 Scary thing #[a(class="text-red" href="/thing/" + image.id) ##{image.id}]
+    button.btn-lg.btn-primary#the-fb-share-btn
+      i(class="fa fa-facebook")  Share
+
+  a(href="/") Back to home

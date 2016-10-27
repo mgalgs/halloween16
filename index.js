@@ -61,9 +61,14 @@ function imageView(req, res, limit) {
     });
 }
 
-app.get('/', function (req, res) {
-    console.log('Get of /')
+app.get('/', function(req, res) {
+    console.log('Get of /');
     imageView(req, res, 10);
+});
+
+app.get('/browse', function(req, res) {
+    console.log('Get of /browse');
+    imageView(req, res, -1);
 });
 
 app.post('/upload', function(req, res) {

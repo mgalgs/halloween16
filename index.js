@@ -56,9 +56,12 @@ function imageURL(image_id) {
     return imageFromBase(image_id);
 }
 
-function imageInfo(image_id) {
+function imageInfo(req, image_id) {
+    var url = imageURL(image_id);
+    var fullUrl = req.protocol + '://' + req.get('host') + url;
     return {
-        url: imageURL(image_id),
+        url: url,
+        fullUrl: fullUrl,
         id: image_id
     }
 }
@@ -71,7 +74,9 @@ function imageView(req, res, start) {
             res.status(500).send(err);
             return;
         }
-        images = items.reverse().map(imageInfo);
+        images = items.reverse().map(function(item) {
+            return imageInfo(req, item);
+        });
         res.render('index', {
             images: images,
             start: start,
@@ -101,7 +106,7 @@ app.get('/browse', function(req, res) {
 
 app.get('/thing/:imageId', function(req, res) {
     res.render('image_detail', {
-        image: imageInfo(req.params.imageId)
+        image: imageInfo(req, req.params.imageId)
     })
 });
 
@@ -152,7 +157,7 @@ app.post('/upload', function(req, res) {
                     return;
                 }
                 redisClient.rpush('ween16:image_list', image_id);
-                io.emit('new image', imageInfo(image_id));
+                io.emit('new image', imageInfo(req, image_id));
                 res.send('File uploaded!');
             });
         });

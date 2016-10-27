@@ -75,18 +75,14 @@ function imageView(req, res, start) {
         res.render('index', {
             images: images,
             start: start,
-            is_admin: is_admin
+            is_admin: is_admin(req)
         });
     });
 }
 
-var is_admin = false;
-
-app.use(function(req, res, next) {
-    if (req.query.token == process.env.API_KEY)
-        is_admin = true;
-    next();
-});
+function is_admin(req) {
+    return req.query.token == process.env.API_KEY;
+}
 
 app.get('/', function(req, res) {
     console.log('Get of /');
@@ -96,6 +92,16 @@ app.get('/', function(req, res) {
 app.get('/browse', function(req, res) {
     console.log('Get of /browse');
     imageView(req, res, 0);
+});
+
+app.post('/delete', function(req, res) {
+    console.log('Deleting %d', req.body.id)
+    redisClient.lrem('ween16:image_list', 1, req.body.id, function(err, nremoved) {
+        if (err) {
+            res.status(500).send(err);
+        }
+        res.redirect('/');
+    });
 });
 
 app.post('/upload', function(req, res) {

@@ -7,7 +7,9 @@ block content
         img(src=image.url).img-rounded
         h4 Scary
         if is_admin
-          a(href="/delete/" + image.id).btn.btn-primary Delete
+          form(action="/delete" method="POST")
+            input(type="hidden" name="id" value=image.id)
+            button.btn.btn-primary Delete
   unless start == 0
     div
       a(href="/browse") More

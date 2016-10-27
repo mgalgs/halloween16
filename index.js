@@ -141,7 +141,7 @@ app.post('/upload', function(req, res) {
                     return;
                 }
                 redisClient.rpush('ween16:image_list', image_id);
-                io.emit('new image', imageURL(image_id));
+                io.emit('new image', imageInfo(image_id));
                 res.send('File uploaded!');
             });
         });

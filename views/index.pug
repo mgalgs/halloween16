@@ -5,11 +5,11 @@ block content
     each image in images
       div.image
         img(src=image.url).img-rounded
-        h4 Scary
+        h4 Scary thing ##{image.id}
         if is_admin
           form(action="/delete" method="POST")
             input(type="hidden" name="id" value=image.id)
             button.btn.btn-primary Delete
   unless start == 0
     div
-      a(href="/browse") More
+      a(href="/browse").bigger More

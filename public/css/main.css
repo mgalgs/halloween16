@@ -41,3 +41,7 @@ h4 {
 .image img {
     width: 90%;
 }
+
+.bigger {
+    font-size: 2em;
+}

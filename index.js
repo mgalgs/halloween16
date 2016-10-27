@@ -58,7 +58,12 @@ function imageURL(image_id) {
 
 function imageInfo(req, image_id) {
     var url = imageURL(image_id);
-    var fullUrl = req.protocol + '://' + req.get('host') + url;
+    var baseUrl, fullUrl;
+    if (req.get('host').indexOf('localhost') == -1)
+        baseUrl = 'https://scaryphotobooth.com'
+    else
+        baseUrl = req.protocol + '://' + req.get('host');
+    fullUrl = baseUrl + url;
     return {
         url: url,
         fullUrl: fullUrl,

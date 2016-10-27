@@ -17,8 +17,13 @@
   },
   "homepage": "https://github.com/mgalgs/halloween16#readme",
   "dependencies": {
+    "console-stamp": "^0.2.4",
     "express": "^4.14.0",
     "express-fileupload": "0.0.5",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "mmmagic": "^0.4.5",
+    "pug": "^2.0.0-beta6",
+    "redis": "^2.6.2",
+    "socket.io": "^1.5.1"
   }
 }

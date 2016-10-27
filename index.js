@@ -56,8 +56,8 @@ function imageURL(image_id) {
     return imageFromBase(image_id);
 }
 
-function imageView(req, res, limit) {
-    redisClient.lrange('ween16:image_list', 0, limit, function(err, items) {
+function imageView(req, res, start) {
+    redisClient.lrange('ween16:image_list', start, -1, function(err, items) {
         var images;
 
         if (err) {
@@ -67,19 +67,19 @@ function imageView(req, res, limit) {
         images = items.reverse().map(imageURL);
         res.render('index', {
             images: images,
-            limit: limit
+            start: start
         });
     });
 }
 
 app.get('/', function(req, res) {
     console.log('Get of /');
-    imageView(req, res, 10);
+    imageView(req, res, -10);
 });
 
 app.get('/browse', function(req, res) {
     console.log('Get of /browse');
-    imageView(req, res, -1);
+    imageView(req, res, 0);
 });
 
 app.post('/upload', function(req, res) {

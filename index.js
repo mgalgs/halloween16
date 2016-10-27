@@ -10,7 +10,12 @@ var fileUpload = require('express-fileupload');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser')
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 app.use(fileUpload());
 app.use(express.static('public'))
 
@@ -25,9 +30,15 @@ io.on('connection', function(socket){
 });
 
 function initEnvironment() {
+    if (!process.env.hasOwnProperty('API_KEY')) {
+        console.error("Missing API key. Please set API_KEY in your environment.");
+        process.exit(1);
+    }
     mkdirp('public/uploads', function(err) {
-        if (err)
+        if (err) {
             console.error("Couldn't create uploads dir: %s", err);
+            process.exit(1);
+        }
     });
 }
 
@@ -76,6 +87,11 @@ app.post('/upload', function(req, res) {
 
     if (!req.files) {
         res.send('No files were uploaded.');
+        return;
+    }
+
+    if (req.body.token !== process.env.API_KEY) {
+        res.send('Invalid auth token');
         return;
     }
 

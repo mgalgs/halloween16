@@ -17,6 +17,66 @@ TOKEN=$1
 shift
 [[ "$TOKEN" = "" ]] && { echo "Missing auth token"; usage; exit 1; }
 
+SNAPS=(../sounds/SNAP_*.mp3)
+
+syslog()
+{
+    echo $*
+    curl -s --max-time .5 -X POST -F msg="$*" -F token=$TOKEN $HOST/syslog >/dev/null
+}
+
+cleanup()
+{
+    echo
+    syslog "Cleaning up..."
+    turn_off_light
+    teardown_gpios
+    killall mpg123
+    pkill -f serial_stream.py
+    sleep 2
+}
+
+trap cleanup EXIT
+
+play_sound()
+{
+    mpg123 $* >/dev/null 2>&1
+}
+
+play_snapshot_sound()
+{
+    local rand_ind
+    ((rand_ind = $RANDOM % ${#SNAPS[*]} ))
+    play_sound ${SNAPS[$rand_ind]}
+}
+
+GPIONUM=23
+
+ensure_gpio()
+{
+    [[ -e /sys/class/gpio/gpio${GPIONUM} ]] || echo ${GPIONUM} > /sys/class/gpio/export
+    sleep .5  # necessary? who knows. seems to be.
+    echo out > /sys/class/gpio/gpio${GPIONUM}/direction
+}
+
+teardown_gpios()
+{
+    echo in > /sys/class/gpio/gpio${GPIONUM}/direction
+    echo $GPIONUM > /sys/class/gpio/unexport
+}
+
+turn_on_light()
+{
+    ensure_gpio
+    echo 1 > /sys/class/gpio/gpio${GPIONUM}/value
+}
+
+turn_off_light()
+{
+    ensure_gpio
+    echo 0 > /sys/class/gpio/gpio${GPIONUM}/value
+}
+
 upload_img()
 {
     curl -X POST -F file=@$1 -F token=$TOKEN $HOST/upload
@@ -25,11 +85,14 @@ upload_img()
 
 upload_from_cam()
 {
-    echo "Taking snapshot"
+    syslog "Taking snapshot"
+    turn_on_light
+    play_snapshot_sound
     local img=$(mktemp -p $PWD tmp.XXXXXXXXX.jpg)
     fswebcam -r 1280x720 --no-banner $img
     upload_img $img
     rm $img
+    turn_off_light
 }
 
 # from https://voat.co/v/bash/comments/37335
@@ -37,43 +100,55 @@ abs() {
     [ $1 -lt 0 ] && echo $((-$1)) || echo $1
 }
 
+
+# start ye olde sound effects
+
+killall mpg123 2>/dev/null
+play_sound --loop -1 ../sounds/background.mp3 &
+
+
 DIFF_THRESHOLD=12               # must be 1 foot away from normal for snap
 NUM_DIFFS_THRESHOLD=5           # must get 5 diffs for snap
 
 cur_diffs=0
-waiting_for_frame_exit=no
+waiting_for_frame_exit=0
 
 if [[ "$1" = "" ]]; then
     while read line; do
-        echo "[UART: $line]"
+        syslog "[UART: $line]"
+        if [[ $waiting_for_frame_exit -gt 1 ]]; then
+            ((waiting_for_frame_exit--))
+            syslog "min party exit time ($waiting_for_frame_exit)... ignoring current line."
+            continue
+        fi
         # data lines look like: inches=17 normal=37 diffCount=0
         [[ "$line" =~ ^inches= ]] || continue
         inches=$(cut    -d' ' -f1 <<<"$line" | cut -d= -f2)
         normal=$(cut    -d' ' -f2 <<<"$line" | cut -d= -f2)
         diffCount=$(cut -d' ' -f3 <<<"$line" | cut -d= -f2)
-        [[ $inches -eq 0 ]] && { echo "bogus data. Skipping."; continue; }
+        [[ $inches -eq 0 ]] && { syslog "bogus data. Skipping."; continue; }
         (( diff=inches-normal ))
         diff=$(abs $diff)
         if [[ $diff -gt $DIFF_THRESHOLD ]]; then
             # if we just took a snapshot and we're still over the threshold
             # then they're still in frame.
-            [[ $waiting_for_frame_exit = yes ]] && { echo "still waiting for last party to exit frame..."; continue; }
+            [[ $waiting_for_frame_exit = 1 ]] && { syslog "still waiting for last party to exit frame..."; continue; }
 
             (( cur_diffs++ ))
             if [[ $cur_diffs -gt $NUM_DIFFS_THRESHOLD ]]; then
-                echo "   >>> Time for a snapshot <<<"
+                syslog "   >>> Time for a snapshot <<<"
                 upload_from_cam
                 cur_diffs=0
-                waiting_for_frame_exit=yes
+                waiting_for_frame_exit=50
             fi
         else
             cur_diffs=0
             # if we just took a snapshot and now we're under the threshold
             # that means they exited the frame.
-            waiting_for_frame_exit=no
+            waiting_for_frame_exit=0
         fi
     done < <(./env/bin/python serial_stream.py)
 else
-    [[ -r "$1" ]] || { echo "Couldn't read $1"; usage; exit 1; }
+    [[ -r "$1" ]] || { syslog "Couldn't read $1"; usage; exit 1; }
     upload_img $1
 fi

@@ -162,7 +162,7 @@ if [[ "$1" = "" ]]; then
                 syslog "   >>> Time for a snapshot <<<"
                 upload_from_cam
                 cur_diffs=0
-                waiting_for_frame_exit=50
+                waiting_for_frame_exit=15
             fi
         else
             cur_diffs=0

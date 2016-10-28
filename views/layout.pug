@@ -12,6 +12,7 @@ html
     link(href="https://fonts.googleapis.com/css?family=Creepster" rel="stylesheet")
     link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css", rel="stylesheet", integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN", crossorigin="anonymous")
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js")
+    script(src="http://code.jquery.com/color/jquery.color-2.1.2.min.js")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous")
     script(src="/socket.io/socket.io.js")
     script(src="/js/main.js")
@@ -21,6 +22,7 @@ html
     div.fb-like.corner-liker(data-href=path data-layout="box_count" data-action="like" data-size="large" data-show-faces="true" data-share="true")
     div.container
       h1 #[a(href="/") Scary Photobooth!]
+      p.alert.alert-info#waiting-for-exit Please exit the frame!
       block content
 
       hr

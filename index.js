@@ -174,7 +174,26 @@ app.post('/syslog', function(req, res) {
         res.send('Invalid auth token');
         return;
     }
+    if (!req.body.msg) {
+        res.send('No message.');
+        return;
+    }
+
     io.emit('syslog', req.body.msg.split("\\n"));
+    res.send('OK');
+});
+
+app.post('/logstate', function(req, res) {
+    if (req.body.token !== process.env.API_KEY) {
+        res.send('Invalid auth token');
+        return;
+    }
+    if (!req.body.state) {
+        res.send('No state.');
+        return;
+    }
+
+    io.emit('logstate', req.body.state);
     res.send('OK');
 });
 

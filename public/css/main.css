@@ -82,3 +82,11 @@ div#syslog p {
     padding: 0;
     margin: 0;
 }
+
+#waiting-for-exit {
+    display: none;
+}
+
+.alert {
+    font-size: 2em;
+}

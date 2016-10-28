@@ -67,3 +67,18 @@ div.fb-like.corner-liker {
     padding: 10px;
     float: right;
 }
+
+#syslog {
+    text-align: left;
+    font-family: monospace;
+    background-color: #000;
+    color: #04c704;
+    height: 300px;
+    overflow: scroll;
+    margin: 50px 0;
+}
+
+div#syslog p {
+    padding: 0;
+    margin: 0;
+}

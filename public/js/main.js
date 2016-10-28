@@ -24,6 +24,11 @@ $(function() {
         newitem.slideDown();
     });
 
+    socket.on('syslog', function(msg) {
+        $("#syslog").append("<p>" + msg + "</p>");
+        $("#syslog").scrollTop($("#syslog")[0].scrollHeight);
+    });
+
     $("#the-fb-share-btn").on('click', function() {
         FB.ui({
             method: 'share',

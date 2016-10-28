@@ -169,6 +169,15 @@ app.post('/upload', function(req, res) {
     });
 });
 
+app.post('/syslog', function(req, res) {
+    if (req.body.token !== process.env.API_KEY) {
+        res.send('Invalid auth token');
+        return;
+    }
+    io.emit('syslog', req.body.msg);
+    res.send('OK');
+});
+
 http.listen(8081, function () {
     console.log('halloween16 app listening on port 8081!');
 });

@@ -116,9 +116,9 @@ upload_from_cam()
     play_snapshot_sound
     local img=$(mktemp -p $PWD tmp.XXXXXXXXX.jpg)
     fswebcam -r 1280x720 --no-banner $img
+    turn_off_light
     upload_img $img
     rm $img
-    turn_off_light
 }
 
 # from https://voat.co/v/bash/comments/37335

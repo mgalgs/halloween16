@@ -1,0 +1,10 @@
+[Unit]
+Description=halloween16 uploader
+
+[Service]
+User=pi
+Group=pi
+ExecStart=/home/pi/halloween16/scripts/halloween16-uploader.sh pizzapizza
+
+[Install]
+WantedBy=multi-user.target

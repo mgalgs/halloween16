@@ -21,7 +21,7 @@ SNAPS=(../sounds/SNAP_*.mp3)
 
 SYSLOG_BUFCNT=0
 SYSLOG_BUF=""
-SYSLOG_BUFTHRESHOLD=10  # buffer 10 messages before sending
+SYSLOG_BUFTHRESHOLD=15  # buffer 15 messages before sending
 
 syslog_flush()
 {
@@ -39,8 +39,13 @@ syslog()
     syslog_flush
 }
 
+CURSTATE="idle"
+
 logstate()
 {
+    [[ "$*" = "$CURSTATE" ]] && return;
+    CURSTATE="$*"
+    syslog "logstate: $*"
     curl -s --max-time 2 -X POST -F state="$*" -F token=$TOKEN $HOST/logstate >/dev/null
 }
 
@@ -133,10 +138,16 @@ NUM_DIFFS_THRESHOLD=5           # must get 5 diffs for snap
 
 cur_diffs=0
 waiting_for_frame_exit=0
+ignores=0
 
 if [[ "$1" = "" ]]; then
     while read line; do
         grep -q -e "Current: .* Ave: " <<<"$line" && { echo "Calibration: $line"; continue; }
+        if [[ $ignores -gt 0 ]]; then
+            echo "Ignoring during debounce: $line"
+            ((ignores--))
+            continue
+        fi
         syslog "[UART: $line]"
         if [[ $waiting_for_frame_exit -gt 1 ]]; then
             logstate "waiting-for-frame-exit"
@@ -163,6 +174,7 @@ if [[ "$1" = "" ]]; then
                 upload_from_cam
                 cur_diffs=0
                 waiting_for_frame_exit=15
+                ignores=20
             fi
         else
             cur_diffs=0

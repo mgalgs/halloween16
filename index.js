@@ -11,6 +11,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var bodyParser = require('body-parser')
+var favicon = require('serve-favicon');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(fileUpload());
 app.use(express.static('public'))
+app.use(favicon(__dirname + '/public/images/favicon.ico'));
 
 app.set('view engine', 'pug');
 

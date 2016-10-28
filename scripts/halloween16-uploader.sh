@@ -19,10 +19,24 @@ shift
 
 SNAPS=(../sounds/SNAP_*.mp3)
 
+SYSLOG_BUFCNT=0
+SYSLOG_BUF=""
+SYSLOG_BUFTHRESHOLD=5  # buffer 5 messages before sending
+
+syslog_flush()
+{
+    curl -s --max-time .5 -X POST -F msg="$SYSLOG_BUF" -F token=$TOKEN $HOST/syslog >/dev/null &
+    SYSLOG_BUFCNT=0
+    SYSLOG_BUF=""
+}
+
 syslog()
 {
     echo $*
-    curl -s --max-time .5 -X POST -F msg="$*" -F token=$TOKEN $HOST/syslog >/dev/null
+    ((SYSLOG_BUFCNT++))
+    SYSLOG_BUF="$SYSLOG_BUF\n$*"
+    [[ $SYSLOG_BUFCNT -lt $SYSLOG_BUFTHRESHOLD ]] && return
+    syslog_flush
 }
 
 cleanup()
@@ -33,6 +47,7 @@ cleanup()
     teardown_gpios
     killall mpg123
     pkill -f serial_stream.py
+    syslog_flush
     sleep 2
 }
 
@@ -115,6 +130,7 @@ waiting_for_frame_exit=0
 
 if [[ "$1" = "" ]]; then
     while read line; do
+        grep -q -e "Current: .* Ave: " <<<"$line" && { echo "Calibration: $line"; continue; }
         syslog "[UART: $line]"
         if [[ $waiting_for_frame_exit -gt 1 ]]; then
             ((waiting_for_frame_exit--))

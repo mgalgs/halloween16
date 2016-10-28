@@ -24,8 +24,10 @@ $(function() {
         newitem.slideDown();
     });
 
-    socket.on('syslog', function(msg) {
-        $("#syslog").append("<p>" + msg + "</p>");
+    socket.on('syslog', function(messages) {
+        messages.forEach(function(m) {
+            $("#syslog").append("<p>" + m + "</p>");
+        });
         $("#syslog").scrollTop($("#syslog")[0].scrollHeight);
     });
 

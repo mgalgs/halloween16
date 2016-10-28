@@ -174,7 +174,7 @@ app.post('/syslog', function(req, res) {
         res.send('Invalid auth token');
         return;
     }
-    io.emit('syslog', req.body.msg);
+    io.emit('syslog', req.body.msg.split("\\n"));
     res.send('OK');
 });
 

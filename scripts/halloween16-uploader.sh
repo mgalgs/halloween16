@@ -21,7 +21,7 @@ SNAPS=(../sounds/SNAP_*.mp3)
 
 SYSLOG_BUFCNT=0
 SYSLOG_BUF=""
-SYSLOG_BUFTHRESHOLD=5  # buffer 5 messages before sending
+SYSLOG_BUFTHRESHOLD=10  # buffer 10 messages before sending
 
 syslog_flush()
 {
@@ -37,6 +37,11 @@ syslog()
     SYSLOG_BUF="$SYSLOG_BUF\n$*"
     [[ $SYSLOG_BUFCNT -lt $SYSLOG_BUFTHRESHOLD ]] && return
     syslog_flush
+}
+
+logstate()
+{
+    curl -s --max-time 2 -X POST -F state="$*" -F token=$TOKEN $HOST/logstate >/dev/null
 }
 
 cleanup()
@@ -100,6 +105,7 @@ upload_img()
 
 upload_from_cam()
 {
+    logstate "snapshot-in-progress"
     syslog "Taking snapshot"
     turn_on_light
     play_snapshot_sound
@@ -133,6 +139,7 @@ if [[ "$1" = "" ]]; then
         grep -q -e "Current: .* Ave: " <<<"$line" && { echo "Calibration: $line"; continue; }
         syslog "[UART: $line]"
         if [[ $waiting_for_frame_exit -gt 1 ]]; then
+            logstate "waiting-for-frame-exit"
             ((waiting_for_frame_exit--))
             syslog "min party exit time ($waiting_for_frame_exit)... ignoring current line."
             continue
@@ -162,6 +169,7 @@ if [[ "$1" = "" ]]; then
             # if we just took a snapshot and now we're under the threshold
             # that means they exited the frame.
             waiting_for_frame_exit=0
+            logstate "idle"
         fi
     done < <(./env/bin/python serial_stream.py)
 else

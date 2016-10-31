@@ -114,7 +114,11 @@ app.get('/browse', function(req, res) {
 app.get('/thing/:imageId', function(req, res) {
     res.render('image_detail', {
         image: imageInfo(req, req.params.imageId)
-    })
+    });
+});
+
+app.get('/how-it-works', function(req, res) {
+    res.render('how_it_works');
 });
 
 app.post('/delete', function(req, res) {
